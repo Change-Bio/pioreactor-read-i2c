@@ -111,7 +111,7 @@ class I2CToVoltage(LongRunningBackgroundJob):
             for channel in range(4):
                 raw, volts = self.read_single_ended(channel)
                 self.publish(
-                    f"pioreactor/{self.unit}/{self.experiment}/{self.job_name}/A{channel}",
+                    f"pioreactor/{self.unit}/{self.experiment}/pioreactor_read_serial/A{channel}",
                     volts,
                 )
                 self.logger.debug(f"A{channel}: raw={raw:5d} → {volts:7.4f} V")
