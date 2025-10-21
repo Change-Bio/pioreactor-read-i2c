@@ -1,4 +1,4 @@
-recursive-include pioreactor_read_serial/ui/ *.yaml
-include pioreactor_read_serial/additional_config.ini
-include pioreactor_read_serial/post_install.sh
-include pioreactor_read_serial/pre_uninstall.sh
+recursive-include pioreactor_i2c_to_voltage/ui/ *.yaml
+include pioreactor_i2c_to_voltage/additional_config.ini
+include pioreactor_i2c_to_voltage/post_install.sh
+include pioreactor_i2c_to_voltage/pre_uninstall.sh

@@ -1,0 +1,26 @@
+# There are lots of examples of job yaml files at https://github.com/Pioreactor/pioreactorui/tree/master/contrib/jobs
+---
+display_name: I2C to Voltage # human readable name
+job_name: i2c_to_voltage # `job_name` as defined in your Python file
+display: true # bool; true to display on the /Pioreactors card
+source: pioreactor-i2c-to-voltage # name of your plugin
+description: This plugin reads voltages from ADS1015 I2C ADC and exports them to MQTT for access by other jobs # description of what your plugin does
+published_settings:
+  - key: i2c_bus # as defined in Python
+    unit: Bus # unit (ml, lux, AU, etc.)
+    label: I2C Bus # human readable name
+    description: I2C bus number (typically 1 on Raspberry Pi) # description of your setting
+    type: numeric # one of numeric, boolean, string, json
+    display: true # bool; true to display on the /Pioreactors card
+  - key: i2c_addr # as defined in Python
+    unit: Address # unit (ml, lux, AU, etc.)
+    label: I2C Address # human readable name
+    description: I2C address of ADS1015 (e.g., 0x48) # description of your setting
+    type: string # one of numeric, boolean, string, json
+    display: true # bool; true to display on the /Pioreactors card
+  - key: gain_bits # as defined in Python
+    unit: Bits # unit (ml, lux, AU, etc.)
+    label: Gain Bits # human readable name
+    description: PGA gain setting (0=±6.144V, 1=±4.096V, 2=±2.048V, 3=±1.024V, 4=±0.512V, 5=±0.256V) # description of your setting
+    type: numeric # one of numeric, boolean, string, json
+    display: true # bool; true to display on the /Pioreactors card

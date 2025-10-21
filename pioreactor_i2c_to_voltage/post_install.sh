@@ -6,4 +6,4 @@ set -e
 
 export LC_ALL=C
 
-sudo systemctl enable pioreactor_startup_run@pioreactor_read_serial.service
+sudo systemctl enable pioreactor_startup_run@i2c_to_voltage.service

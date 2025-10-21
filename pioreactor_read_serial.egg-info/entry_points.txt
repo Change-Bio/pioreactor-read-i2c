@@ -1,2 +1,0 @@
-[pioreactor.plugins]
-pioreactor_read_serial = pioreactor_read_serial
