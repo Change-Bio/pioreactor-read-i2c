@@ -24,3 +24,31 @@ published_settings:
     description: PGA gain setting (0=±6.144V, 1=±4.096V, 2=±2.048V, 3=±1.024V, 4=±0.512V, 5=±0.256V) # description of your setting
     type: numeric # one of numeric, boolean, string, json
     display: true # bool; true to display on the /Pioreactors card
+  - key: sampling_rate
+    unit: Hz
+    label: Sampling Rate
+    description: ADC sampling frequency in Hz (higher rates better capture noise for filtering)
+    type: numeric
+    display: true
+  - key: publish_rate
+    unit: Hz
+    label: Publish Rate
+    description: How often filtered voltage values are published to MQTT
+    type: numeric
+    display: true
+  - key: moving_avg_window
+    unit: Samples
+    label: Moving Average Window
+    description: Number of samples to average for noise filtering (larger = smoother but more lag)
+    type: numeric
+    display: true
+  - key: enable_filtering
+    label: Enable Filtering
+    description: Apply moving average filter to reduce noise
+    type: boolean
+    display: true
+  - key: run_diagnostics
+    label: Run Diagnostics
+    description: Trigger FFT analysis to identify noise sources (results published to MQTT)
+    type: boolean
+    display: true

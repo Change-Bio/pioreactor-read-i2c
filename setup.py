@@ -13,7 +13,7 @@ setup(
     url="https://github.com/noahsprent/pioreactor-i2c-to-voltage",
     packages=find_packages(),
     include_package_data=True,
-    install_requires=["smbus2"],
+    install_requires=["smbus2", "numpy"],
     entry_points={
         "pioreactor.plugins": "pioreactor_i2c_to_voltage = pioreactor_i2c_to_voltage"
     },
