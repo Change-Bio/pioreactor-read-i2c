@@ -7,9 +7,10 @@ You can set this job to run automatically on starting the Raspberry Pi and then 
 ## Hardware Setup
 
 This plugin is designed for the ADS1015 12-bit ADC:
-- Connect the ADS1015 to the Raspberry Pi I2C bus (typically bus 1)
-- Default I2C address is 0x48 (can be changed via ADDR pin wiring)
+- Connect one or more ADS1015 ADCs to the Raspberry Pi I2C bus (typically bus 1)
+- Default I2C addresses are 0x48 and 0x4A (can be changed via ADDR pin wiring to 0x48-0x4B)
 - Supports full-scale voltage ranges from ±0.256V to ±6.144V via gain settings
+- Multiple ADCs can be used simultaneously by specifying comma-separated addresses
 
 ## Installation
 
@@ -42,7 +43,7 @@ pio run i2c_to_voltage
 Under _Manage_, there will be a new _Activities_ option called _i2c_to_voltage_.
 Editable settings are:
 - **I2C Bus**: The I2C bus number (typically 1 on Raspberry Pi)
-- **I2C Address**: The I2C address of the ADS1015 (e.g., 0x48)
+- **I2C Addresses**: Comma-separated list of I2C addresses for ADS1015 ADCs (e.g., 0x48,0x4A)
 - **Gain Bits**: PGA gain setting to set voltage range:
   - 0: ±6.144V (default, safely reads 0-5V sensors)
   - 1: ±4.096V
@@ -50,15 +51,29 @@ Editable settings are:
   - 3: ±1.024V
   - 4: ±0.512V
   - 5: ±0.256V
+- **Sampling Rate**: ADC sampling frequency (default 200 Hz)
+- **Publish Rate**: How often filtered voltages are published to MQTT (default 1 Hz)
+- **Moving Average Window**: Number of samples to average for noise filtering (default 20)
+- **Enable Filtering**: Apply moving average filter to reduce noise (default true)
 
 ## MQTT Topics
 
 Voltages are published to:
 ```
-pioreactor/{unit}/{experiment}/i2c_to_voltage/A0
-pioreactor/{unit}/{experiment}/i2c_to_voltage/A1
-pioreactor/{unit}/{experiment}/i2c_to_voltage/A2
-pioreactor/{unit}/{experiment}/i2c_to_voltage/A3
+pioreactor/{unit}/{experiment}/pioreactor_read_serial/0x{addr}_A0
+pioreactor/{unit}/{experiment}/pioreactor_read_serial/0x{addr}_A1
+pioreactor/{unit}/{experiment}/pioreactor_read_serial/0x{addr}_A2
+pioreactor/{unit}/{experiment}/pioreactor_read_serial/0x{addr}_A3
+```
+
+For example, with addresses 0x48 and 0x4A:
+```
+pioreactor/{unit}/{experiment}/pioreactor_read_serial/0x48_A0
+pioreactor/{unit}/{experiment}/pioreactor_read_serial/0x48_A1
+...
+pioreactor/{unit}/{experiment}/pioreactor_read_serial/0x4A_A0
+pioreactor/{unit}/{experiment}/pioreactor_read_serial/0x4A_A1
+...
 ```
 
 ## Plugin documentation

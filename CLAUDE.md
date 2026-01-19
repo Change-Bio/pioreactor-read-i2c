@@ -4,14 +4,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Pioreactor plugin that reads voltage data from an ADS1015 I2C analog-to-digital converter and publishes voltage values to MQTT topics. It enables the Pioreactor to read analog sensor data through the 4-channel 12-bit ADC.
+This is a Pioreactor plugin that reads voltage data from one or more ADS1015 I2C analog-to-digital converters and publishes voltage values to MQTT topics. It enables the Pioreactor to read analog sensor data through multiple 4-channel 12-bit ADCs.
 
 **Key Architecture:**
 - Main job class: `I2CToVoltage` (extends `LongRunningBackgroundJob` from pioreactor)
 - Runs as a systemd service on boot via `pioreactor_startup_run@i2c_to_voltage.service`
-- Uses `RepeatedTimer` to read all 4 ADC channels every 4+ seconds
-- Publishes voltage data to MQTT: `pioreactor/{unit}/{experiment}/i2c_to_voltage/A{0-3}`
-- Hardware: ADS1015 12-bit ADC on I2C bus (default address 0x48)
+- Uses `RepeatedTimer` to sample all 4 ADC channels from all configured addresses at high frequency (default 200Hz)
+- Publishes filtered voltage data to MQTT at lower frequency (default 1Hz)
+- Publishes voltage data to MQTT: `pioreactor/{unit}/{experiment}/pioreactor_read_serial/0x{addr}_A{0-3}`
+- Hardware: One or more ADS1015 12-bit ADCs on I2C bus (default addresses 0x48, 0x4A)
 
 ## Development Commands
 
@@ -83,15 +84,20 @@ The plugin adds configuration to Pioreactor's `config.ini`:
 ```ini
 [i2c_to_voltage.config]
 i2c_bus=1
-i2c_addr=0x48
+i2c_addr=0x48,0x4A
 gain_bits=0
+sampling_rate=200
+publish_rate=1.0
+moving_avg_window=20
+enable_filtering=true
+diagnostic_duration=10
 ```
 
 These are settable at runtime via MQTT or the UI.
 
 **Configuration Details:**
 - `i2c_bus`: I2C bus number (typically 1 on Raspberry Pi)
-- `i2c_addr`: Hex address of ADS1015 (0x48 default, can be 0x49-0x4B depending on ADDR pin)
+- `i2c_addr`: Comma-separated list of hex addresses of ADS1015 ADCs (e.g., 0x48,0x4A; can be 0x48-0x4B depending on ADDR pin wiring)
 - `gain_bits`: PGA gain setting (0-5) controlling voltage range:
   - 0: ±6.144V (safe for 0-5V sensors)
   - 1: ±4.096V
@@ -99,6 +105,11 @@ These are settable at runtime via MQTT or the UI.
   - 3: ±1.024V
   - 4: ±0.512V
   - 5: ±0.256V
+- `sampling_rate`: High-frequency ADC sampling rate in Hz (default 200)
+- `publish_rate`: Low-frequency MQTT publish rate in Hz (default 1.0)
+- `moving_avg_window`: Number of samples to average for noise filtering (default 20)
+- `enable_filtering`: Enable/disable moving average filter (default true)
+- `diagnostic_duration`: Duration in seconds for FFT-based noise diagnostics (default 10)
 
 ## Plugin Structure
 
@@ -115,12 +126,15 @@ pioreactor_i2c_to_voltage/
 
 ## ADS1015 ADC Details
 
-The plugin reads from an ADS1015 12-bit ADC via I2C:
-- 4 single-ended channels (A0-A3)
+The plugin reads from one or more ADS1015 12-bit ADCs via I2C:
+- 4 single-ended channels per ADC (A0-A3)
 - Configurable gain/voltage range via PGA settings
 - Single-shot conversion mode at 1600 SPS
-- Each channel is read sequentially every 4+ seconds
-- Voltage values are published to individual MQTT topics per channel
+- High-frequency sampling (default 200Hz) with moving average filtering
+- Low-frequency publishing (default 1Hz) to reduce MQTT traffic
+- Voltage values are published to individual MQTT topics per ADC address and channel
+- Topic format: `pioreactor/{unit}/{experiment}/pioreactor_read_serial/0x{addr}_A{channel}`
+- FFT-based noise diagnostics available for identifying interference sources
 
 ## Pioreactor Plugin Conventions
 

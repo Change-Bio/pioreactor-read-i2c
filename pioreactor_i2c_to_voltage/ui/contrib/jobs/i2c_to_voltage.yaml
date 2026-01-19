@@ -13,9 +13,9 @@ published_settings:
     type: numeric # one of numeric, boolean, string, json
     display: true # bool; true to display on the /Pioreactors card
   - key: i2c_addr # as defined in Python
-    unit: Address # unit (ml, lux, AU, etc.)
-    label: I2C Address # human readable name
-    description: I2C address of ADS1015 (e.g., 0x48) # description of your setting
+    unit: Addresses # unit (ml, lux, AU, etc.)
+    label: I2C Addresses # human readable name
+    description: Comma-separated list of I2C addresses for ADS1015 ADCs (e.g., 0x48,0x4A) # description of your setting
     type: string # one of numeric, boolean, string, json
     display: true # bool; true to display on the /Pioreactors card
   - key: gain_bits # as defined in Python
