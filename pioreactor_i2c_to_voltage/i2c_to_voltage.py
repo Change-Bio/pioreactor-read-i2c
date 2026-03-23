@@ -76,6 +76,11 @@ class I2CToVoltage(LongRunningBackgroundJob):
         # Structure: {address: [channel0_buffer, channel1_buffer, channel2_buffer, channel3_buffer]}
         self.channel_buffers = {addr: [[] for _ in range(4)] for addr in self.i2c_addresses}
 
+        # Rate-limit error logging to avoid flooding MQTT/database
+        self._i2c_error_count = 0
+        self._last_error_log_time = 0.0
+        self._error_log_interval = 60.0  # seconds between error logs
+
         # Calculate sampling interval
         sampling_interval = 1.0 / self.sampling_rate
 
@@ -158,7 +163,16 @@ class I2CToVoltage(LongRunningBackgroundJob):
                         self.channel_buffers[i2c_addr][channel].pop(0)
 
         except Exception as e:
-            self.logger.error(f"Error sampling I2C: {e}")
+            self._i2c_error_count += 1
+            now = time.monotonic()
+            if now - self._last_error_log_time >= self._error_log_interval:
+                suppressed = self._i2c_error_count - 1
+                msg = f"Error sampling I2C: {e}"
+                if suppressed > 0:
+                    msg += f" ({suppressed} similar errors suppressed in last {self._error_log_interval:.0f}s)"
+                self.logger.error(msg)
+                self._i2c_error_count = 0
+                self._last_error_log_time = now
 
     def publish_filtered_voltages(self):
         """Low-frequency publishing - apply filter and publish to MQTT."""
@@ -182,7 +196,6 @@ class I2CToVoltage(LongRunningBackgroundJob):
                         f"pioreactor/{self.unit}/{self.experiment}/pioreactor_read_serial/{topic_suffix}",
                         filtered_voltage,
                     )
-                    self.logger.debug(f"{topic_suffix}: {filtered_voltage:7.4f} V (filtered)")
 
         except Exception as e:
             self.logger.error(f"Error publishing voltages: {e}")
